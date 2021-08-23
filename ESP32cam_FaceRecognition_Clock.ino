@@ -53,6 +53,11 @@ int currentHour = -1;
 
 bool isTwelveHour = false;
 
+boolean getFace = false;
+boolean sendImage = false;
+long prevMillis = 0;
+int interval = 5000; // 拍照間隔
+
 void startCameraServer();
 
 void setup()
@@ -159,7 +164,6 @@ void loop()
   {
     currentMinute = xt;
     drawMinute();
-    sendImage2LineNotify("照片來了");
   }
 
   xt = timeClient.getHours();
@@ -167,6 +171,20 @@ void loop()
   {
     currentHour = xt;
     drawHour();
+  }
+
+  if (getFace == true && sendImage == false)
+  {
+    Serial.println("Send image to line notify.");
+    sendImage2LineNotify("抓到了");
+    prevMillis = millis();
+  }
+
+  if (sendImage == true && millis() - prevMillis > interval)
+  {
+    Serial.println("standby!");
+    getFace = false;
+    sendImage = false;
   }
 }
 
@@ -222,6 +240,7 @@ void sendImage2LineNotify(String msg)
       tcpClient.stop();
       esp_camera_fb_return(fb); //清除緩衝區
       Serial.println("Send succeed.");
+      sendImage = true;
     }
     else
     {

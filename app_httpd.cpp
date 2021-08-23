@@ -64,6 +64,8 @@ static int8_t recognition_enabled = 0;
 static int8_t is_enrolling = 0;
 static face_id_list id_list = {0};
 
+extern boolean getFace;
+
 static ra_filter_t *ra_filter_init(ra_filter_t *filter, size_t sample_size)
 {
     memset(filter, 0, sizeof(ra_filter_t));
@@ -139,6 +141,8 @@ static int rgb_printf(dl_matrix3du_t *image_matrix, uint32_t color, const char *
 
 static void draw_face_boxes(dl_matrix3du_t *image_matrix, box_array_t *boxes, int face_id)
 {
+    getFace = true;
+
     int x, y, w, h, i;
     uint32_t color = FACE_COLOR_YELLOW;
     if (face_id < 0)
