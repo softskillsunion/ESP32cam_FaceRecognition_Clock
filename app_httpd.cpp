@@ -64,7 +64,7 @@ static int8_t recognition_enabled = 0;
 static int8_t is_enrolling = 0;
 static face_id_list id_list = {0};
 
-extern boolean getFace;
+extern boolean noMatchFace;
 
 static ra_filter_t *ra_filter_init(ra_filter_t *filter, size_t sample_size)
 {
@@ -141,8 +141,6 @@ static int rgb_printf(dl_matrix3du_t *image_matrix, uint32_t color, const char *
 
 static void draw_face_boxes(dl_matrix3du_t *image_matrix, box_array_t *boxes, int face_id)
 {
-    getFace = true;
-
     int x, y, w, h, i;
     uint32_t color = FACE_COLOR_YELLOW;
     if (face_id < 0)
@@ -224,6 +222,8 @@ static int run_face_recognition(dl_matrix3du_t *image_matrix, box_array_t *net_b
                 Serial.println("No Match Found");
                 rgb_print(image_matrix, FACE_COLOR_RED, "Intruder Alert!");
                 matched_id = -1;
+
+                noMatchFace = true;
             }
         }
     }

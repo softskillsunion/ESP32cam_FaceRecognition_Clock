@@ -53,7 +53,7 @@ int currentHour = -1;
 
 bool isTwelveHour = false;
 
-boolean getFace = false;
+boolean noMatchFace = false;
 boolean sendImage = false;
 long prevMillis = 0;
 int interval = 5000; // 拍照間隔
@@ -173,17 +173,17 @@ void loop()
     drawHour();
   }
 
-  if (getFace == true && sendImage == false)
+  if (noMatchFace == true && sendImage == false)
   {
     Serial.println("Send image to line notify.");
-    sendImage2LineNotify("抓到了");
+    sendImage2LineNotify("是誰？");
     prevMillis = millis();
   }
 
   if (sendImage == true && millis() - prevMillis > interval)
   {
     Serial.println("standby!");
-    getFace = false;
+    noMatchFace = false;
     sendImage = false;
   }
 }
