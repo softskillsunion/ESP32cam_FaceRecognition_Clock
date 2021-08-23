@@ -1,0 +1,14 @@
+{
+  "configurations": [
+    {
+      "name": "Win32",
+      "includePath": [
+        "D:\\OneDrive\\Arduino\\libraries",
+        "C:\\Users\\${env:Username}\\AppData\\Local\\Arduino15\\packages\\esp32\\**"
+      ],
+      "forcedInclude": [],
+      "intelliSenseMode": "msvc-x64"
+    }
+  ],
+  "version": 4
+}

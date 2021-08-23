@@ -1,0 +1,8 @@
+{
+    "sketch": "ESP32cam_FaceRecognition_Clock.ino",
+    "board": "esp32:esp32:esp32wrover",
+    "configuration": "PartitionScheme=huge_app,FlashMode=qio,FlashFreq=80,UploadSpeed=921600,DebugLevel=none",
+    "port": "COM11",
+    "programmer": "AVR ISP",
+    "output": "D:\\Temp\\vscode\\.build"
+}
