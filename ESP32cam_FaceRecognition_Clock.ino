@@ -28,8 +28,11 @@
 #define HOUR_PIN 2
 #define MINUTE_PIN 14
 
-const char *password = "SSID密碼"; //WiFi Password
 const char *ssid = "SSID名稱";     //WiFi SSID
+const char *password = "SSID密碼"; //WiFi Password
+
+const char *host = "notify-api.line.me"; //LINE Notify API網址
+String lineNotifyToken = "LINE Notify金鑰";
 
 // LED
 Adafruit_NeoPixel HourPixels = Adafruit_NeoPixel(NUM_LEDS_HOUR, HOUR_PIN, NEO_GRB + NEO_KHZ800);
@@ -39,6 +42,9 @@ Adafruit_NeoPixel MinutePixels = Adafruit_NeoPixel(NUM_LEDS_MINUTE, MINUTE_PIN, 
 WiFiUDP ntpUDP;
 // timeClient(ntpUDP, NTP主機位置, 時區偏移量(秒), 取得NTP時間的更新間隔(秒));
 NTPClient timeClient(ntpUDP, "time.stdtime.gov.tw", 8 * 3600, 1800);
+
+//SSL wificlient
+WiFiClientSecure tcpClient;
 
 uint32_t PixelsColor = 0xffffff;
 
@@ -153,6 +159,7 @@ void loop()
   {
     currentMinute = xt;
     drawMinute();
+    sendMessage2LineNotify(String(currentMinute));
   }
 
   xt = timeClient.getHours();
@@ -160,6 +167,30 @@ void loop()
   {
     currentHour = xt;
     drawHour();
+  }
+}
+
+void sendMessage2LineNotify(String msg)
+{
+  if (tcpClient.connect(host, 443))
+  {
+    Serial.println(msg);
+    int msgLength = msg.length();
+    Serial.println(msgLength);
+    // POST表頭
+    tcpClient.println("POST /api/notify HTTP/1.1");
+    tcpClient.println(String("Host: ") + host);
+    tcpClient.println("Authorization: Bearer " + lineNotifyToken);
+    tcpClient.println("Content-Type: application/x-www-form-urlencoded");
+    tcpClient.println("Content-Length: " + String((msgLength + 10)));
+    tcpClient.println();
+    tcpClient.println("message=" + msg);
+    tcpClient.println();
+    tcpClient.stop();
+  }
+  else
+  {
+    Serial.println("Connected fail");
   }
 }
 
