@@ -159,7 +159,7 @@ void loop()
   {
     currentMinute = xt;
     drawMinute();
-    sendMessage2LineNotify(String(currentMinute));
+    sendImage2LineNotify("照片來了");
   }
 
   xt = timeClient.getHours();
@@ -167,6 +167,67 @@ void loop()
   {
     currentHour = xt;
     drawHour();
+  }
+}
+
+void sendImage2LineNotify(String msg)
+{
+  camera_fb_t *fb = NULL;
+  fb = esp_camera_fb_get(); //取得相機影像放置fb
+  if (!fb)
+  {
+    delay(100);
+    Serial.println("Camera capture failed.");
+    //    ESP.restart();
+  }
+  else
+  {
+
+    if (tcpClient.connect(host, 443))
+    {
+      String head = "--SoftSkillsUnion\r\nContent-Disposition: form-data; name=\"message\"; \r\n\r\n" + msg;
+      head += "\r\n--SoftSkillsUnion\r\nContent-Disposition: form-data; name=\"imageFile\"; filename=\"esp32-cam.jpg\"\r\nContent-Type: image/jpeg\r\n\r\n";
+      String tail = "\r\n--SoftSkillsUnion--\r\n";
+      uint16_t imageLen = fb->len;
+      uint16_t extraLen = head.length() + tail.length();
+      uint16_t totalLen = imageLen + extraLen;
+      //POST
+      tcpClient.println("POST /api/notify HTTP/1.1");
+      tcpClient.println("Connection: close");
+      tcpClient.println(String("Host: ") + host);
+      tcpClient.println("Authorization: Bearer " + lineNotifyToken);
+      tcpClient.println("Content-Length: " + String(totalLen));
+      tcpClient.println("Content-Type: multipart/form-data; boundary=SoftSkillsUnion");
+      tcpClient.println();
+      tcpClient.print(head);
+      uint8_t *fbBuf = fb->buf;
+      size_t fbLen = fb->len;
+      Serial.println("Data Sending....");
+      //圖檔分段傳送
+      for (size_t n = 0; n < fbLen; n = n + 2048)
+      {
+        if (n + 2048 < fbLen)
+        {
+          tcpClient.write(fbBuf, 2048);
+          fbBuf += 2048;
+        }
+        else if (fbLen % 2048 > 0)
+        {
+          size_t remainder = fbLen % 2048;
+          tcpClient.write(fbBuf, remainder);
+        }
+      }
+      tcpClient.print(tail);
+      tcpClient.println();
+      tcpClient.stop();
+      esp_camera_fb_return(fb); //清除緩衝區
+      Serial.println("Send succeed.");
+    }
+    else
+    {
+      esp_camera_fb_return(fb);
+      Serial.println("Send failed.");
+    }
   }
 }
 
